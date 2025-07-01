@@ -73,17 +73,17 @@ def resolver_simplex():
         tipo, funcao_obj, restricoes = dados
         back.resolucao(tipo=tipo, funcao_obj=funcao_obj, restricoes=restricoes, plotar=0)
 
-def resolver_simplex_inteiro():
+""" def resolver_simplex_inteiro():
     dados = coletar_dados()
     if dados:
         tipo, funcao_obj, restricoes = dados
-        messagebox.showinfo("Simplex Inteiro", f"Tipo: {tipo}\nFunção: {funcao_obj}\nRestrições: {restricoes}")
+        messagebox.showinfo("Simplex Inteiro", f"Tipo: {tipo}\nFunção: {funcao_obj}\nRestrições: {restricoes}") """
 
-def resolver_simplex_dual():
+""" def resolver_simplex_dual():
     dados = coletar_dados()
     if dados:
         tipo, funcao_obj, restricoes = dados
-        messagebox.showinfo("Simplex Dual", f"Tipo: {tipo}\nFunção: {funcao_obj}\nRestrições: {restricoes}")
+        messagebox.showinfo("Simplex Dual", f"Tipo: {tipo}\nFunção: {funcao_obj}\nRestrições: {restricoes}") """
 
 def plotar_regiao():
     dados = coletar_dados()
@@ -144,14 +144,14 @@ frame_botoes.pack(pady=30)
 btn_resolver_normal = ctk.CTkButton(frame_botoes, text="Resolver Simplex Normal", command=resolver_simplex, width=250)
 btn_resolver_normal.grid(row=0, column=0, padx=10, pady=5)
 
-btn_resolver_inteiro = ctk.CTkButton(frame_botoes, text="Resolver Simplex Inteiro", command=resolver_simplex_inteiro, width=250)
-btn_resolver_inteiro.grid(row=0, column=1, padx=10, pady=5)
+""" btn_resolver_inteiro = ctk.CTkButton(frame_botoes, text="Resolver Simplex Inteiro", command=resolver_simplex_inteiro, width=250)
+btn_resolver_inteiro.grid(row=0, column=1, padx=10, pady=5) """
 
-btn_resolver_dual = ctk.CTkButton(frame_botoes, text="Resolver Simplex Dual", command=resolver_simplex_dual, width=250)
-btn_resolver_dual.grid(row=1, column=0, padx=10, pady=5)
+""" btn_resolver_dual = ctk.CTkButton(frame_botoes, text="Resolver Simplex Dual", command=resolver_simplex_dual, width=250)
+btn_resolver_dual.grid(row=1, column=0, padx=10, pady=5) """
 
 btn_plotar = ctk.CTkButton(frame_botoes, text="Plotar Região de Viabilidade", command=plotar_regiao, width=250)
-btn_plotar.grid(row=1, column=1, padx=10, pady=5)
+btn_plotar.grid(row=0, column=1, padx=10, pady=5)
 
 # Rodar a janela
 janela.mainloop()
