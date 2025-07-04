@@ -12,7 +12,7 @@ def minimizacao(vetor_z, matriz_restricoes, plotar):
     qtd_restricoes_igual = np.sum(matriz_restricoes == '=')
     qtd_restricoes_maior = np.sum(matriz_restricoes == '>=')
 
-    if qtd_restricoes_igual == 0 & qtd_restricoes_maior == 0:
+    if (qtd_restricoes_igual + qtd_restricoes_maior) == 0:
         for i in range(linhas_totais):
             vetor_z = np.append(vetor_z,0)
 
@@ -25,90 +25,94 @@ def minimizacao(vetor_z, matriz_restricoes, plotar):
 
         vetor_direito = np.take(matriz_restricoes, -1, axis=1).astype(float)
 
-        tabular.metodo_tabular(vetor_z=vetor_z.astype(float),matriz_esquerda=matriz_esquerda,vetor_direito=vetor_direito)
+        if plotar == 0:
+            tabular.metodo_tabular(vetor_z=vetor_z.astype(float),matriz_esquerda=matriz_esquerda,vetor_direito=vetor_direito,plotar=plotar)
+        else:
+            vetor_direito, idx_x1, idx_x2 = tabular.metodo_tabular(vetor_z=vetor_z.astype(float), matriz_esquerda=matriz_esquerda, vetor_direito=vetor_direito, plotar=plotar)
+            grafico.plot(vetor_z=vetor_z_inicial, matriz_restricoes=matriz_restricoes_inicial, z_otimo=vetor_direito_final[0], x1=vetor_direito_final[idx_x1], x2=vetor_direito_final[idx_x2])
+    else:
+        vetor_vazio = np.empty((linhas_totais))
 
-    vetor_vazio = np.empty((linhas_totais))
+        matriz = matriz_restricoes[:,:-2]
+        matriz_vazia = np.empty((linhas_totais,linhas_totais))
 
-    matriz = matriz_restricoes[:,:-2]
-    matriz_vazia = np.empty((linhas_totais,linhas_totais))
+        for i in range(linhas_totais):
+            tipo_restricao = matriz_restricoes[i,-2]
 
-    for i in range(linhas_totais):
-        tipo_restricao = matriz_restricoes[i,-2]
+            if tipo_restricao == '<=':
+                vetor_vazio[i] = 0
 
-        if tipo_restricao == '<=':
-            vetor_vazio[i] = 0
+                for j in range(linhas_totais):
+                    if i == j:
+                        matriz_vazia[i,j] = 1
+                    else:
+                        matriz_vazia[i,j] = 0
+            elif tipo_restricao == '=':
+                vetor_vazio[i] = 100
 
-            for j in range(linhas_totais):
-                if i == j:
-                    matriz_vazia[i,j] = 1
-                else:
-                    matriz_vazia[i,j] = 0
-        elif tipo_restricao == '=':
-            vetor_vazio[i] = 100
+                for j in range(linhas_totais):
+                    if i == j:
+                        matriz_vazia[i,j] = 1
+                    else:
+                        matriz_vazia[i,j] = 0
+            elif tipo_restricao == '>=':
+                vetor_vazio[i] = 0
 
-            for j in range(linhas_totais):
-                if i == j:
-                    matriz_vazia[i,j] = 1
-                else:
-                    matriz_vazia[i,j] = 0
-        elif tipo_restricao == '>=':
-            vetor_vazio[i] = 0
+                for j in range(linhas_totais):
+                    if i == j:
+                        matriz_vazia[i,j] = -1
+                    else:
+                        matriz_vazia[i,j] = 0
 
-            for j in range(linhas_totais):
-                if i == j:
-                    matriz_vazia[i,j] = -1
-                else:
-                    matriz_vazia[i,j] = 0
+        matriz_esquerda = np.hstack([matriz,matriz_vazia]).astype(float)
+        
+        vetor_direito = np.take(matriz_restricoes, -1, axis=1).astype(float)
 
-    matriz_esquerda = np.hstack([matriz,matriz_vazia]).astype(float)
-    
-    vetor_direito = np.take(matriz_restricoes, -1, axis=1).astype(float)
+        vetor_z_final = np.hstack([vetor_z,vetor_vazio])
+        z_inicial = 0
 
-    vetor_z_final = np.hstack([vetor_z,vetor_vazio])
-    z_inicial = 0
+        for i in range(linhas_totais):
+            tipo_restricao = matriz_restricoes[i,-2]
 
-    for i in range(linhas_totais):
-        tipo_restricao = matriz_restricoes[i,-2]
+            if tipo_restricao == '=':
+                linha_igual = matriz_esquerda[i] * -100
 
-        if tipo_restricao == '=':
-            linha_igual = matriz_esquerda[i] * -100
+                vetor_z_final = vetor_z_final + linha_igual
 
-            vetor_z_final = vetor_z_final + linha_igual
+                z_inicial = z_inicial + (vetor_direito[i] * -100)
 
-            z_inicial = z_inicial + (vetor_direito[i] * -100)
+        if qtd_restricoes_maior > 0:
+            matriz_vazia_ext = np.empty((linhas_totais,qtd_restricoes_maior))
 
-    if qtd_restricoes_maior > 0:
-        matriz_vazia_ext = np.empty((linhas_totais,qtd_restricoes_maior))
+            for i in range(linhas_totais):
+                tipo_restricao = matriz_restricoes[i,-2]
+
+                if tipo_restricao == '>=':
+                    vetor_z_final = np.append(vetor_z_final,100)
+
+                for j in range(qtd_restricoes_maior):
+                    if j == i:
+                        if tipo_restricao == '>=':
+                            matriz_vazia_ext[i,j] = 1
+                        else:
+                            matriz_vazia_ext[i,j] = 0
+                    else:
+                        matriz_vazia_ext[i,j] = 0
+
+            matriz_esquerda = np.hstack([matriz_esquerda,matriz_vazia_ext])
 
         for i in range(linhas_totais):
             tipo_restricao = matriz_restricoes[i,-2]
 
             if tipo_restricao == '>=':
-                vetor_z_final = np.append(vetor_z_final,100)
+                linha_maior_igual = matriz_esquerda[i] * -100
 
-            for j in range(qtd_restricoes_maior):
-                if j == i:
-                    if tipo_restricao == '>=':
-                        matriz_vazia_ext[i,j] = 1
-                    else:
-                        matriz_vazia_ext[i,j] = 0
-                else:
-                    matriz_vazia_ext[i,j] = 0
+                vetor_z_final = vetor_z_final + linha_maior_igual
 
-        matriz_esquerda = np.hstack([matriz_esquerda,matriz_vazia_ext])
+                z_inicial = z_inicial + (vetor_direito[i] * -100)
 
-    for i in range(linhas_totais):
-        tipo_restricao = matriz_restricoes[i,-2]
-
-        if tipo_restricao == '>=':
-            linha_maior_igual = matriz_esquerda[i] * -100
-
-            vetor_z_final = vetor_z_final + linha_maior_igual
-
-            z_inicial = z_inicial + (vetor_direito[i] * -100)
-
-    if plotar == 0:
-        bigM.metodo_bigM(vetor_z=vetor_z_final, matriz_esquerda=matriz_esquerda, vetor_direito=vetor_direito, z_inicial=z_inicial, tipo_operacao=1, plotar=0)
-    else:
-        vetor_direito_final, idx_x1, idx_x2 = bigM.metodo_bigM(vetor_z=vetor_z_final, matriz_esquerda=matriz_esquerda, vetor_direito=vetor_direito, z_inicial=z_inicial,tipo_operacao=1, plotar=1)
-        grafico.plot(vetor_z=vetor_z_inicial, matriz_restricoes=matriz_restricoes_inicial, z_otimo=vetor_direito_final[0], x1=vetor_direito_final[idx_x1], x2=vetor_direito_final[idx_x2])
+        if plotar == 0:
+            bigM.metodo_bigM(vetor_z=vetor_z_final, matriz_esquerda=matriz_esquerda, vetor_direito=vetor_direito, z_inicial=z_inicial, tipo_operacao=1, plotar=0)
+        else:
+            vetor_direito_final, idx_x1, idx_x2 = bigM.metodo_bigM(vetor_z=vetor_z_final, matriz_esquerda=matriz_esquerda, vetor_direito=vetor_direito, z_inicial=z_inicial,tipo_operacao=1, plotar=1)
+            grafico.plot(vetor_z=vetor_z_inicial, matriz_restricoes=matriz_restricoes_inicial, z_otimo=vetor_direito_final[0], x1=vetor_direito_final[idx_x1], x2=vetor_direito_final[idx_x2])
